@@ -1,0 +1,21 @@
+services:
+  docker-monitor:
+    image: node:22-alpine
+    container_name: homebase-docker-monitor
+    restart: unless-stopped
+    user: "${DOCKER_MONITOR_UID}:${DOCKER_MONITOR_GID}"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 128m
+    command: [node, /app/server.mjs]
+    network_mode: host
+    environment:
+      LISTEN_ADDRESS: "${DOCKER_MONITOR_LISTEN_ADDRESS:-127.0.0.1}"
+      PORT: "23750"
+      ALLOWED_ADDRESS: "${DOCKER_MONITOR_ALLOWED_ADDRESS:-127.0.0.1}"
+    volumes:
+      - ./server.mjs:/app/server.mjs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/tailscale/tailscaled.sock:/var/run/tailscale/tailscaled.sock:ro

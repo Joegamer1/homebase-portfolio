@@ -1,0 +1,436 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Domain {
+  LAB
+  SECURITY
+  CAREER
+  GAMES
+  FAMILY
+  SYSTEM
+}
+
+enum Severity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AttentionStatus {
+  NEW
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum IntegrationState {
+  UNKNOWN
+  HEALTHY
+  DEGRADED
+  DOWN
+  DISABLED
+}
+
+model UserSettings {
+  id              String   @id @default(cuid())
+  timezone        String   @default("America/New_York")
+  theme           String   @default("homebase-dark")
+  currentSalary   Int      @default(70000)
+  minimumSalary   Int      @default(75000)
+  preferredSalary Int      @default(85000)
+  careerLocations Json     @default("[\"Dayton, OH\", \"Columbus, OH\", \"Cincinnati, OH\"]")
+  allowRemoteJobs Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CareerProfile {
+  id               String   @id
+  name             String
+  currentSalary    Int      @default(70000)
+  minimumSalary    Int      @default(75000)
+  preferredSalary  Int      @default(85000)
+  locations        Json
+  allowRemote      Boolean  @default(true)
+  targetTitles     Json
+  targetSkills     Json
+  advancementTerms Json
+  regressionTerms  Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Integration {
+  id        String             @id @default(cuid())
+  key       String             @unique
+  name      String
+  enabled   Boolean            @default(false)
+  mockMode  Boolean            @default(true)
+  config    Json?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  health    IntegrationHealth?
+  runs      CollectorRun[]
+}
+
+model IntegrationHealth {
+  id                String           @id @default(cuid())
+  integrationId     String           @unique
+  state             IntegrationState @default(UNKNOWN)
+  lastAttemptAt     DateTime?
+  lastSuccessAt     DateTime?
+  lastError         String?
+  latencyMs         Int?
+  consecutiveErrors Int              @default(0)
+  updatedAt         DateTime         @updatedAt
+  integration       Integration      @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+}
+
+model Asset {
+  id         String                @id @default(cuid())
+  externalId String?
+  name       String
+  kind       String
+  domain     Domain                @default(LAB)
+  metadata   Json?
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  services   Service[]
+  metrics    MetricSnapshot[]
+  technology TechnologyInventory[]
+
+  @@unique([kind, externalId])
+}
+
+model Service {
+  id         String           @id @default(cuid())
+  assetId    String?
+  name       String
+  kind       String
+  state      String
+  version    String?
+  source     String
+  lastSeenAt DateTime         @default(now())
+  metadata   Json?
+  asset      Asset?           @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  metrics    MetricSnapshot[]
+}
+
+model MetricSnapshot {
+  id         BigInt   @id @default(autoincrement())
+  assetId    String?
+  serviceId  String?
+  metric     String
+  value      Float
+  unit       String?
+  capturedAt DateTime @default(now())
+  asset      Asset?   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  service    Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([metric, capturedAt])
+}
+
+model AttentionItem {
+  id          String          @id @default(cuid())
+  fingerprint String          @unique
+  domain      Domain
+  title       String
+  summary     String
+  severity    Severity
+  urgency     Int
+  relevance   Int
+  consequence Int
+  recency     Int
+  confidence  Int
+  score       Float
+  explanation String
+  source      String
+  sourceUrl   String?
+  entity      String
+  firstSeenAt DateTime        @default(now())
+  lastSeenAt  DateTime        @default(now())
+  status      AttentionStatus @default(NEW)
+  action      Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([status, score])
+  @@index([domain, lastSeenAt])
+}
+
+model Goal {
+  id          String         @id @default(cuid())
+  domain      Domain
+  title       String
+  description String?
+  active      Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  progress    GoalProgress[]
+}
+
+model GoalProgress {
+  id        String   @id @default(cuid())
+  goalId    String
+  value     Int
+  note      String?
+  createdAt DateTime @default(now())
+  goal      Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model CalendarEvent {
+  id         String    @id @default(cuid())
+  externalId String?
+  calendar   String
+  title      String
+  startsAt   DateTime
+  endsAt     DateTime?
+  allDay     Boolean   @default(false)
+  location   String?
+  source     String
+  metadata   Json?
+
+  @@unique([source, externalId])
+  @@index([startsAt])
+}
+
+model JobPosting {
+  id               String     @id @default(cuid())
+  externalId       String?
+  title            String
+  company          String
+  location         String?
+  arrangement      String?
+  employmentType   String?
+  salaryMin        Int?
+  salaryMax        Int?
+  salaryCurrency   String?
+  source           String
+  sourceUrl        String?
+  postedAt         DateTime?
+  summary          String?
+  description      String?
+  firstSeenAt      DateTime   @default(now())
+  lastSeenAt       DateTime   @default(now())
+  matchScore       Int?
+  careerValueScore Int?
+  reasons          Json?
+  gaps             Json?
+  status           String     @default("NEW")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  skills           JobSkill[]
+
+  @@unique([source, externalId])
+  @@index([status, matchScore])
+  @@index([postedAt])
+}
+
+model JobSkill {
+  id           String     @id @default(cuid())
+  jobPostingId String
+  name         String
+  required     Boolean    @default(false)
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+
+  @@unique([jobPostingId, name])
+}
+
+model SecurityAdvisory {
+  id             String    @id @default(cuid())
+  externalId     String
+  source         String
+  title          String
+  summary        String?
+  severity       Severity
+  publishedAt    DateTime?
+  modifiedAt     DateTime?
+  sourceUrl      String?
+  knownExploited Boolean   @default(false)
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([source, externalId])
+}
+
+model TechnologyInventory {
+  id         String   @id @default(cuid())
+  assetId    String?
+  product    String
+  vendor     String?
+  version    String?
+  source     String
+  confidence Int      @default(100)
+  enabled    Boolean  @default(true)
+  metadata   Json?
+  detectedAt DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  asset      Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+
+  @@index([product, version])
+}
+
+model Game {
+  id        String              @id @default(cuid())
+  slug      String              @unique
+  name      String
+  createdAt DateTime            @default(now())
+  entities  TrackedGameEntity[]
+  updates   GameUpdate[]
+}
+
+model TrackedGameEntity {
+  id         String  @id @default(cuid())
+  gameId     String
+  externalId String?
+  name       String
+  kind       String
+  active     Boolean @default(true)
+  game       Game    @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, kind, name])
+}
+
+model GameUpdate {
+  id          String    @id @default(cuid())
+  gameId      String
+  externalId  String?
+  title       String
+  summary     String?
+  publishedAt DateTime?
+  source      String
+  sourceUrl   String?
+  metadata    Json?
+  game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([source, externalId])
+}
+
+model GamePreference {
+  id         String   @id @default(cuid())
+  game       String
+  entityId   String
+  name       String
+  kind       String
+  active     Boolean  @default(true)
+  queues     Json     @default("[]")
+  roles      Json     @default("[]")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@unique([game, entityId])
+}
+
+model GameUpdateState {
+  id          String   @id @default(cuid())
+  updateKey   String   @unique
+  saved       Boolean  @default(false)
+  read        Boolean  @default(false)
+  dismissed   Boolean  @default(false)
+  note        String?
+  updatedAt   DateTime @updatedAt
+}
+
+model FamilySelection {
+  id         String   @id @default(cuid())
+  kind       String
+  externalId String
+  label      String
+  area       String?
+  threshold  Json?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@unique([kind, externalId])
+}
+
+model FamilyReminder {
+  id         String   @id @default(cuid())
+  title      String
+  dueAt      DateTime?
+  completed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model FamilyAlertState {
+  id           String   @id @default(cuid())
+  alertKey     String   @unique
+  acknowledged Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+}
+
+model FeedSource {
+  id             String     @id @default(cuid())
+  key            String     @unique
+  name           String
+  domain         Domain
+  url            String?
+  enabled        Boolean    @default(false)
+  refreshMinutes Int        @default(60)
+  items          FeedItem[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model FeedItem {
+  id           String     @id @default(cuid())
+  feedSourceId String
+  externalId   String?
+  title        String
+  summary      String?
+  publishedAt  DateTime?
+  sourceUrl    String?
+  payload      Json?
+  createdAt    DateTime   @default(now())
+  feedSource   FeedSource @relation(fields: [feedSourceId], references: [id], onDelete: Cascade)
+
+  @@unique([feedSourceId, externalId])
+}
+
+model CollectorRun {
+  id            String      @id @default(cuid())
+  integrationId String
+  startedAt     DateTime    @default(now())
+  completedAt   DateTime?
+  success       Boolean?
+  itemCount     Int         @default(0)
+  error         String?
+  metadata      Json?
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@index([integrationId, startedAt])
+}
+
+model IntegrationSnapshot {
+  id             String   @id @default(cuid())
+  integrationKey String   @unique
+  collectedAt    DateTime
+  payload        Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model MediaItem {
+  id          String   @id @default(cuid())
+  externalId  String
+  title       String
+  kind        String
+  parentTitle String?
+  source      String
+  addedAt     DateTime
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([source, externalId])
+  @@index([addedAt])
+}

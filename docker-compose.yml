@@ -1,0 +1,128 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_HOMEBASE_API_URL: ${HOMEBASE_API_PUBLIC_URL:-http://localhost:4000}
+    image: homebase:local
+    container_name: homebase-web
+    restart: unless-stopped
+    command: ["node", "apps/web/.next/standalone/apps/web/server.js"]
+    environment:
+      PORT: 3000
+    ports:
+      - "${HOMEBASE_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_HOMEBASE_API_URL: ${HOMEBASE_API_PUBLIC_URL:-http://localhost:4000}
+    image: homebase:local
+    container_name: homebase-api
+    restart: unless-stopped
+    command: ["node_modules/.bin/tsx", "services/api/src/server.ts"]
+    environment: &api-environment
+      COLLECTION_MODE: worker
+      COLLECTOR_RUN_RETENTION_DAYS: ${COLLECTOR_RUN_RETENTION_DAYS:-30}
+      API_PORT: 4000
+      WEB_ORIGIN: ${HOMEBASE_WEB_ORIGIN:-http://localhost:3000}
+      DATABASE_URL: postgresql://homebase:${POSTGRES_PASSWORD:-homebase_dev}@db:5432/homebase
+      DOCKER_PROXY_URL: ${DOCKER_PROXY_URL:-}
+      DOCKER_EXPECTED_DOWN_NAMES: ${DOCKER_EXPECTED_DOWN_NAMES:-}
+      DOCKER_RESTART_WARNING_COUNT: ${DOCKER_RESTART_WARNING_COUNT:-5}
+      UPTIME_KUMA_BASE_URL: ${UPTIME_KUMA_BASE_URL:-}
+      UPTIME_KUMA_API_KEY: ${UPTIME_KUMA_API_KEY:-}
+      SERVICE_REFRESH_SECONDS: ${SERVICE_REFRESH_SECONDS:-60}
+      PIHOLE_BASE_URL: ${PIHOLE_BASE_URL:-}
+      PIHOLE_APP_PASSWORD: ${PIHOLE_APP_PASSWORD:-}
+      PLEX_BASE_URL: ${PLEX_BASE_URL:-}
+      PLEX_TOKEN: ${PLEX_TOKEN:-}
+      PLEX_REFRESH_SECONDS: ${PLEX_REFRESH_SECONDS:-15}
+      HOME_ASSISTANT_BASE_URL: ${HOME_ASSISTANT_BASE_URL:-}
+      HOME_ASSISTANT_TOKEN: ${HOME_ASSISTANT_TOKEN:-}
+      HOMEBASE_TIMEZONE: ${HOMEBASE_TIMEZONE:-America/New_York}
+      FAMILY_CALENDAR_DAYS: ${FAMILY_CALENDAR_DAYS:-92}
+      FAMILY_REFRESH_SECONDS: ${FAMILY_REFRESH_SECONDS:-120}
+      TAILSCALE_STATUS_URL: ${TAILSCALE_STATUS_URL:-}
+      HOME_SYSTEM_REFRESH_SECONDS: ${HOME_SYSTEM_REFRESH_SECONDS:-120}
+      CISA_KEV_URL: ${CISA_KEV_URL:-https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json}
+      NVD_CVE_URL: ${NVD_CVE_URL:-https://services.nvd.nist.gov/rest/json/cves/2.0}
+      NVD_API_KEY: ${NVD_API_KEY:-}
+      SECURITY_LOOKBACK_DAYS: ${SECURITY_LOOKBACK_DAYS:-30}
+      SECURITY_MAX_ADVISORIES: ${SECURITY_MAX_ADVISORIES:-100}
+      SECURITY_REFRESH_SECONDS: ${SECURITY_REFRESH_SECONDS:-21600}
+      CAREER_JSEARCH_API_KEY: ${CAREER_JSEARCH_API_KEY:-}
+      CAREER_GREENHOUSE_BOARDS: ${CAREER_GREENHOUSE_BOARDS:-gitlab:GitLab,cloudflare:Cloudflare,canonical:Canonical,datadog:Datadog,elastic:Elastic}
+      CAREER_LEVER_BOARDS: ${CAREER_LEVER_BOARDS:-spotify:Spotify,wealthsimple:Wealthsimple,palantir:Palantir}
+      CAREER_ASHBY_BOARDS: ${CAREER_ASHBY_BOARDS:-vanta:Vanta,ramp:Ramp,notion:Notion}
+      CAREER_MOCK_ENABLED: ${CAREER_MOCK_ENABLED:-false}
+      CAREER_MAX_JOBS: ${CAREER_MAX_JOBS:-150}
+      CAREER_REFRESH_SECONDS: ${CAREER_REFRESH_SECONDS:-21600}
+      PROXMOX_BASE_URL: ${PROXMOX_BASE_URL:-}
+      PROXMOX_TOKEN_ID: ${PROXMOX_TOKEN_ID:-}
+      PROXMOX_TOKEN_SECRET: ${PROXMOX_TOKEN_SECRET:-}
+      PROXMOX_TLS_VERIFY: ${PROXMOX_TLS_VERIFY:-true}
+      PROXMOX_STORAGE_WARNING_PERCENT: ${PROXMOX_STORAGE_WARNING_PERCENT:-80}
+      PROXMOX_CPU_WARNING_PERCENT: ${PROXMOX_CPU_WARNING_PERCENT:-90}
+      PROXMOX_MEMORY_WARNING_PERCENT: ${PROXMOX_MEMORY_WARNING_PERCENT:-90}
+      PROXMOX_EXPECTED_DOWN_IDS: ${PROXMOX_EXPECTED_DOWN_IDS:-}
+    ports:
+      - "${HOMEBASE_API_PORT:-4000}:4000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:4000/api/v1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  worker:
+    image: homebase:local
+    container_name: homebase-worker
+    restart: unless-stopped
+    command: ["node_modules/.bin/tsx", "services/api/src/worker.ts"]
+    environment:
+      <<: *api-environment
+      COLLECTION_MODE: worker
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    stop_grace_period: 60s
+
+  migrate:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_HOMEBASE_API_URL: ${HOMEBASE_API_PUBLIC_URL:-http://localhost:4000}
+    image: homebase:local
+    command: ["node_modules/.bin/prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: postgresql://homebase:${POSTGRES_PASSWORD:-homebase_dev}@db:5432/homebase
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  db:
+    image: postgres:17-alpine
+    container_name: homebase-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: homebase
+      POSTGRES_USER: homebase
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-homebase_dev}
+    volumes:
+      - homebase_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homebase -d homebase"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  homebase_postgres:

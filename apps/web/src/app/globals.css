@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #111720;
+  --panel: #19222d;
+  --panel-raised: #222e3a;
+  --surface-soft: #151d27;
+  --line: #2d3a48;
+  --line-bright: #45576a;
+  --text: #f2f5f7;
+  --muted: #a8b3bd;
+  --faint: #748291;
+  --cyan: #77cbd5;
+  --green: #86c89f;
+  --amber: #e3b56f;
+  --red: #e27f7f;
+  --violet: #ae9ddd;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(119, 203, 213, 0.1), transparent 30rem),
+    radial-gradient(circle at 95% 5%, rgba(174, 157, 221, 0.08), transparent 28rem), var(--bg);
+  color: var(--text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input {
+  font: inherit;
+}
+
+button,
+summary,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+summary:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(103, 198, 207, 0.28);
+}
+
+.mono {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 32px rgba(2, 7, 13, 0.16);
+}
+
+.soft-card {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 3px);
+}
+
+.filter-tab {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  padding: 0.65rem 0.8rem;
+  text-align: left;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.filter-tab:hover {
+  background: var(--panel-raised);
+  color: var(--text);
+}
+
+.filter-tab[data-active="true"] {
+  background: color-mix(in srgb, var(--cyan) 12%, var(--panel-raised));
+  border-color: color-mix(in srgb, var(--cyan) 65%, var(--line));
+  color: var(--text);
+}
+
+.section-label {
+  color: var(--muted);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  box-shadow: 0 0 9px currentColor;
+}
+
+.scrollbar-thin {
+  scrollbar-color: var(--line-bright) transparent;
+  scrollbar-width: thin;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .attention-row {
+    transition:
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+}
