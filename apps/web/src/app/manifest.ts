@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "HOMEBASE",
     short_name: "HOMEBASE",
-    description: "the owner's private daily command center.",
+    description: "A private dashboard for lab status and daily updates.",
     start_url: "/",
     display: "standalone",
     background_color: "#07090b",

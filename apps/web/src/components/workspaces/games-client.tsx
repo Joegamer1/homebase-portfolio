@@ -93,7 +93,7 @@ export function GamesClient() {
       <PageHeading
         eyebrow="Workspace / 05"
         title="Game intelligence"
-        description="What changed that affects how the owner plays, and what to review before queueing."
+        description="Recent updates for your tracked games and characters."
       />
       <div className="mb-4 flex flex-wrap gap-2">
         {["for-me", "league", "deadlock", "saved", "history"].map((v) => (

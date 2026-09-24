@@ -4,7 +4,7 @@ import { AppShell } from "@/components/shell/app-shell";
 
 export const metadata: Metadata = {
   title: { default: "HOMEBASE", template: "%s // HOMEBASE" },
-  description: "A private personal command center for what matters today.",
+  description: "Lab status, security advisories, jobs, game updates, and calendars.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "HOMEBASE", statusBarStyle: "black-translucent" },
   icons: { icon: "/icon.svg", apple: "/icon.svg" },

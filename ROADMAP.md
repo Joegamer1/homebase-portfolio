@@ -1,8 +1,10 @@
-# ROADMAP
+# Roadmap
+
+This is the original phased build plan. The [README](README.md) describes what is included in the current snapshot.
 
 ## Milestone 0 — Foundation
 
-Goal: Create a working, attractive HOMEBASE shell with mock data.
+Goal: Build the Homebase shell with mock data.
 
 Deliverables:
 
@@ -73,7 +75,7 @@ Features:
 - optional CPU/RAM
 - Uptime Kuma integration
 
-Prefer a restricted Docker socket proxy or purpose-built API instead of blindly mounting `/var/run/docker.sock`.
+Prefer a restricted Docker socket proxy or purpose-built API instead of mounting `/var/run/docker.sock`.
 
 ---
 
@@ -129,7 +131,7 @@ Features:
 
 Key question:
 
-> Would this role move the owner forward?
+> Would this job be a step forward for me?
 
 ---
 
@@ -157,7 +159,7 @@ Features:
 - household alerts
 - maintenance
 
-Keep this supportive, simple, and private.
+Keep household data private and make common calendar actions easy to find.
 
 ---
 

@@ -1,78 +1,79 @@
 # Homebase
 
-Homebase is a self-hosted personal operations dashboard. It brings home infrastructure, security advisories, career opportunities, games, and household calendars into one interface organized around a simple question: **what needs attention today?**
+I built Homebase because I wanted one place to check my homelab, security advisories, job listings, game updates, and household calendars. It runs privately and helps me decide what needs attention without opening each service separately.
 
-This repository is a sanitized project snapshot. The application was designed for a private deployment; it is shared here to show the product design, architecture, implementation, and AI-assisted development process. Sample profile values and local addresses are illustrative. No production credentials, private network addresses, household records, or deployment backups are included.
+I designed the product and used AI to help implement and test it. This repository contains the application source with personal details removed and example configuration in place of my deployment settings. More on that process in [AI_WORKFLOW.md](AI_WORKFLOW.md).
 
-## Product highlights
+## What's in it
 
-- **Attention engine:** deterministic ranking with visible reasons and stable identifiers, so an urgent infrastructure issue can surface alongside other domains without hiding its source.
-- **Operational workspaces:** Proxmox, Docker, Uptime Kuma, Pi-hole, Plex, Home Assistant, and Tailscale collectors normalize provider data into versioned API contracts. Failed collections preserve the last successful snapshot and mark it stale.
-- **Security intelligence:** CISA KEV and NVD data are matched against an inventory with explicit uncertainty when a version cannot be verified.
-- **Career Radar:** job board and optional search feeds are deduplicated and scored for skill match and career value. Provider requests, scoring, and persistence stay server-side.
-- **Games and Family:** game update feeds and household calendars are presented as actionable summaries with source and freshness context.
-- **Responsive clients:** a Next.js web/PWA consumes the API; a Swift native client prototype connects to a configured server.
+- **Home:** a ranked attention list, today's events, and status across the other sections. Each item shows why it was ranked.
+- **Lab:** status from Proxmox, Docker, Uptime Kuma, Pi-hole, Plex, Home Assistant, and Tailscale. When a collection fails, the last successful result stays visible with a stale label.
+- **Security:** CISA KEV and NVD advisories matched against a software inventory. Possible version matches are marked for review.
+- **Career Radar:** job listings from employer boards and an optional search provider, with separate scores for skills and career advancement. Listings can be saved, dismissed, or marked as applied.
+- **Games:** updates for tracked games and characters, with links to the source.
+- **Family:** household calendars collected through Home Assistant.
 
-The interface prioritizes clear status, source provenance, loading and stale states, and actions that help the owner decide what to do next. See [DESIGN.md](DESIGN.md), [ARCHITECTURE.md](ARCHITECTURE.md), and [AI_WORKFLOW.md](AI_WORKFLOW.md) for the design and build approach.
+The main interface is a responsive Next.js web app/PWA. There is also a Swift client prototype in `apps/native`.
 
-## Architecture
+## How it works
 
 ```text
-apps/web, apps/native
-        │
-        ▼
-services/api  ──► packages/api-contracts
-        │
-        ├──► packages/attention-engine
-        ├──► packages/career-engine
-        ├──► packages/collectors ──► external read-only sources
-        └──► PostgreSQL / Prisma
+Web/PWA or native client
+        |
+        v
+Node.js API (/api/v1)
+        |
+        +-- Shared Zod contracts
+        +-- Attention and career scoring
+        +-- Collectors for external services
+        +-- PostgreSQL / Prisma
 ```
 
-The web client uses `/api/v1` and does not access collectors or persistence directly. Server configuration is validated at startup. The collection worker refreshes integrations independently, while API responses expose health, freshness, and stale fallback. Provider credentials belong only in the local server environment.
+The browser calls the Homebase API. Collection, scoring, credentials, and database access stay on the server. A worker refreshes each integration independently. [ARCHITECTURE.md](ARCHITECTURE.md) covers the structure; [DESIGN.md](DESIGN.md) covers the interface decisions.
 
 ## Run locally
 
-Requires Docker Engine with Compose v2. From the repository root:
+Requires Docker Engine and Compose v2:
 
 ```bash
 cp .env.example .env
+# Set a local database password in .env before starting.
 docker compose up --build
 ```
 
-Open the web app at `http://localhost:3000` and API health at `http://localhost:4000/api/v1/health`. The included `.env.example` has placeholder settings. Configure only the integrations you want to use; external services require your own credentials and endpoints. This project has no authentication layer for broad public deployment, so keep a running instance on a trusted network.
+Open `http://localhost:3000`. API health is at `http://localhost:4000/api/v1/health`.
 
-For local development with Node.js 22+ and pnpm:
+The example file includes placeholder settings. Add your own endpoints and credentials for the integrations you want to use. Homebase was built for a trusted private network and does not include authentication for an internet-facing deployment.
+
+For development, use Node.js 22+ and pnpm:
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-## Verify
+## Checks
 
 ```bash
 pnpm check
 docker compose config
 ```
 
-`pnpm check` covers formatting, linting, type checks, unit and contract tests, architecture boundaries, and production builds. The boundary check prevents the web client from importing server collectors, Prisma, or known provider credential names.
+`pnpm check` runs formatting, linting, type checks, tests, architecture checks, and production builds. The architecture check catches browser imports of collectors, Prisma, and known provider credential names.
 
-## Repository map
+## Files
 
-| Path                            | Purpose                                       |
-| ------------------------------- | --------------------------------------------- |
-| `apps/web`                      | Responsive web interface and PWA              |
-| `apps/native`                   | Swift client prototype                        |
-| `services/api`                  | Versioned API and collection worker           |
-| `packages/api-contracts`        | Shared Zod response contracts                 |
-| `packages/attention-engine`     | Priority rules and explanations               |
-| `packages/career-engine`        | Job fit and advancement scoring               |
-| `packages/collectors`           | Provider adapters and normalization           |
-| `packages/config`               | Validated server configuration                |
-| `prisma`                        | Schema, migrations, and sample seed           |
-| `infrastructure/docker-monitor` | Restricted read-only Docker telemetry adapter |
+| Path                            | Contents                                  |
+| ------------------------------- | ----------------------------------------- |
+| `apps/web`                      | Web interface and PWA                     |
+| `apps/native`                   | Swift client prototype                    |
+| `services/api`                  | API and collection worker                 |
+| `packages/api-contracts`        | Shared Zod contracts                      |
+| `packages/attention-engine`     | Priority rules and explanations           |
+| `packages/career-engine`        | Job scoring                               |
+| `packages/collectors`           | Provider adapters                         |
+| `packages/config`               | Server configuration validation           |
+| `prisma`                        | Schema, migrations, and example seed data |
+| `infrastructure/docker-monitor` | Read-only Docker telemetry adapter        |
 
-## Scope
-
-Homebase is a personal project and design case study, not a hosted service or supported package. The published configuration is intentionally generic. The original private deployment and its data are outside this repository.
+This is a personal project. I published it so people can look through the design and code; I don't maintain it as a service for others. Credentials, household records, deployment backups, and the original private Git history are excluded. Profile values and addresses in this copy are examples.

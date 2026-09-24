@@ -1,10 +1,10 @@
-# ARCHITECTURE
+# Architecture
 
 ## Architectural rules
 
 - Use TypeScript end-to-end for the first version, running on Node.js.
 - Use React and Next.js for the responsive, installable web/PWA client.
-- Treat web/PWA as Client #1, not as the backend.
+- The web/PWA is an API client.
 - Keep the backend/API deployable and testable separately from the UI.
 - Expose client-facing capabilities through versioned HOMEBASE APIs beginning at `/api/v1`.
 - No client may communicate directly with Proxmox, Docker, Home Assistant, Plex, CISA, job services, game services, or other providers.
@@ -90,7 +90,7 @@ docs/
 - cleanup
 - feed refresh
 
-The services may live in one monorepo and share TypeScript packages, but the UI/API boundary must remain real. They must be independently testable and deployable.
+The services may live in one monorepo and share TypeScript packages, with separate UI and API dependencies. They must be independently testable and deployable.
 
 ## Why PostgreSQL
 
@@ -104,7 +104,7 @@ HOMEBASE will eventually keep:
 - goals
 - attention history
 
-Postgres prevents an eventual migration from a toy persistence layer.
+I chose PostgreSQL to keep snapshots and history in the same database as the app grows.
 
 ## Why server-side collectors
 

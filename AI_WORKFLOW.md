@@ -1,15 +1,15 @@
-# AI-assisted product development
+# How I built Homebase with AI
 
-Homebase was built through iterative human direction and AI-assisted implementation. The owner set the product goals, chose the domains, defined the architecture and interface constraints, reviewed behavior, and validated releases in a private environment. AI helped turn those decisions into code, tests, integration adapters, and UI iterations.
+I used AI throughout the build to help write code, tests, collectors, and UI changes. I chose what the app should do, set the design and architecture requirements, reviewed the results, and tested it in my private environment.
 
-The central product prompt was: **what deserves attention today?** That question guided a cross-domain Attention engine instead of a collection of unrelated status cards. Each major workspace was developed in stages: define useful decisions, normalize source data, expose a stable API, design loading and failure states, then verify the UI against realistic scenarios.
+I started with the home screen and worked through the integrations in stages. For each one, I decided what I needed to see or act on, connected the source, checked the data returned by the API, and worked on how it appeared in the interface. Loading states, failed requests, and stale data needed as much attention as the successful response.
 
-Several design choices came out of that cycle:
+A few decisions shaped the project:
 
-- The browser is an API client, so provider credentials and normalization stay on the server.
-- Collectors share a contract but fail independently; stale data remains visible with its age and source.
-- Security matches distinguish confirmed inventory from possible exposure.
-- Career results separate skill match from career value and disclose estimated compensation.
-- The web interface uses concise summaries and expandable detail to avoid turning the dashboard into a wall of telemetry.
+- Provider credentials stay on the server. The browser uses the Homebase API.
+- A failed integration keeps its last successful result and shows when that result was collected.
+- Security advisories show when a version match still needs checking.
+- Career Radar scores skill match and career advancement separately. It labels salary estimates.
+- The home screen summarizes each area, with details available in its workspace.
 
-AI output was reviewed through code changes, automated checks, and hands-on use. The repository captures the resulting product and engineering decisions, rather than raw private prompts or deployment logs.
+I checked changes with automated tests and by using the app. The code here is the result of that process. Private prompts, credentials, and deployment logs aren't included.

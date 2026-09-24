@@ -1,6 +1,6 @@
-# ATTENTION ENGINE
+# Attention engine
 
-The attention engine is the core differentiator.
+The attention engine ranks items from different parts of Homebase in one list.
 
 ## Initial scoring model
 
@@ -25,9 +25,7 @@ score =
   confidence  * 0.10
 ```
 
-This is intentionally simple.
-
-Make weights configurable later.
+The initial weights are fixed. Configurable weights are planned.
 
 ## Domain-specific examples
 
@@ -129,6 +127,6 @@ Later add snooze.
 
 Every score should produce short text:
 
-> Ranked HIGH because it is urgent, directly relevant, and has significant consequence.
+> Backup failed on a monitored VM; check the task log.
 
-Avoid opaque "AI says so" ranking.
+Show which inputs contributed to the score.
