@@ -31,6 +31,10 @@ Node.js API (/api/v1)
 
 The browser calls the Homebase API. Collection, scoring, credentials, and database access stay on the server. A worker refreshes each integration independently. [ARCHITECTURE.md](ARCHITECTURE.md) covers the structure; [DESIGN.md](DESIGN.md) covers the interface decisions.
 
+## Code walkthrough
+
+See the [feature walkthrough](docs/FEATURE_WALKTHROUGH.md) for source-linked code excerpts explaining attention ranking and last-known-data handling.
+
 ## Run locally
 
 Requires Docker Engine and Compose v2:
