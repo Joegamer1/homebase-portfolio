@@ -4,6 +4,14 @@ I built Homebase because I wanted one place to check my homelab, security adviso
 
 I designed the product and used AI to help implement and test it. This repository contains the application source with personal details removed and example configuration in place of my deployment settings. More on that process in [AI_WORKFLOW.md](AI_WORKFLOW.md).
 
+## Screenshots
+
+Actual Homebase UI rendered locally with synthetic demo data, not production records.
+
+![Homebase dashboard with demo data](docs/images/homebase-overview-demo.jpg)
+
+[View the screenshot tour](docs/SCREENSHOTS.md), including the expanded priority explanation.
+
 ## What's in it
 
 - **Home:** a ranked attention list, today's events, and status across the other sections. Each item shows why it was ranked.
