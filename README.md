@@ -6,11 +6,13 @@ I designed the product and used AI to help implement and test it. This repositor
 
 ## Screenshots
 
-Actual Homebase UI rendered locally with synthetic demo data, not production records.
+Current deployed Homebase interface, captured from sanitized static copies of the Home and Lab pages. Readings and service statuses are illustrative; private addresses and production data are excluded.
 
-![Homebase dashboard with demo data](docs/images/homebase-overview-demo.jpg)
+![Current Homebase Home launcher with sample readings](docs/images/homebase-home-current.jpg)
 
-[View the screenshot tour](docs/SCREENSHOTS.md), including the expanded priority explanation.
+[View the current UI screenshot tour](docs/SCREENSHOTS.md).
+
+These captures show a newer deployed interface than the source snapshot in this repository. They are not proof that a checkout reproduces this exact UI.
 
 ## What's in it
 

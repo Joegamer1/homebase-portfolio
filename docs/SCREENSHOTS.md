@@ -1,26 +1,27 @@
-# Homebase screenshot tour
+# Current Homebase interface
 
-These are genuine browser captures of the Homebase web interface, not generated mockups. Captured on November 9, 2026 from the local source snapshot in a separate screenshot-only copy.
+These screenshots show the deployed orange-and-charcoal Homebase interface inspected in November 2026. They replace the earlier blue Today-view tour, which came from an older local source snapshot.
 
-All events, alerts, counts, progress values, and activity shown are synthetic fixtures validated by the app's shared Home response schema. The interface visibly displays **Showing demo data.** No live integration, household calendar, production API, credential, or private deployment address was used. These demonstrate UI behavior, not current operational status.
+## Home
 
-## Dashboard overview
+![Current Homebase Home launcher with sample readings](images/homebase-home-current.jpg)
 
-![Homebase overview using synthetic demo data](images/homebase-overview-demo.jpg)
+The Home page brings together search, a Docker resource card, and grouped launcher tiles for infrastructure, personal sites, home services, Docker services, media, and bookmarks. The left sidebar provides access to Home, Lab, Security, Career, Projects, Games, Family, and System.
 
-The Home view combines:
-- Cross-domain status cards for Lab, Security, Career, Games, Family, and System.
-- A ranked attention queue with Act first, Review, Everything, and Dismissed filters.
-- A calendar outlook, focus progress, and recent changes.
+## Lab Operations
 
-## Explainable attention
+![Current Homebase Lab Operations overview with illustrative status](images/homebase-lab-current.jpg)
 
-![Expanded attention item with a demo priority explanation](images/homebase-attention-demo.jpg)
+Lab Operations groups infrastructure, services, and home systems in one workspace. The overview shows monitored services, status indicators, alert counts, and navigation to Proxmox, Services, and Home systems.
 
-Expanding a queue item reveals its explanation and priority score. The Acknowledge and Dismiss card controls are part of the real interface; no state-changing actions were performed for these captures. The displayed explanation and score are synthetic examples, not the result of a live event.
+## Capture and privacy notes
 
-See the [source-backed feature walkthrough](FEATURE_WALKTHROUGH.md) for scoring and last-known-data code excerpts.
+- These are browser-rendered screenshots of sanitized static copies of the current deployed pages, not generated mockups.
+- The deployed page layout, styling, fonts, and icons were retained. Scripts and external connections were disabled in the isolated local capture.
+- Private addresses were removed. Resource readings, health indicators, alert counts, and timestamps were replaced with sample values or labels.
+- Green dots and healthy labels illustrate the design; they do not report actual service health.
+- No live services or application records were modified.
+- Only the final screenshot images are published, not the exported page markup or private deployment assets.
+- The current deployed source revision has not been verified. This repository contains an earlier source snapshot; these screenshots do not imply that the checked-in source reproduces the current deployment.
 
-## Capture boundary
-
-The UI layout and components were left intact. Only the copied API client was replaced with schema-validated fixture data for the Home response; other API destinations were redirected to an unused loopback port. The demo bound only to 127.0.0.1. Original source and live services were not changed.
+For source-linked explanations of the code included in this repository, see the [feature walkthrough](FEATURE_WALKTHROUGH.md).
